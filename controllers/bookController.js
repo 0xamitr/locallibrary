@@ -46,7 +46,6 @@ exports.book_list = asyncHandler(async (req, res, next) => {
 
 
 // Display detail page for a specific book.
-// Display detail page for a specific book.
 exports.book_detail = asyncHandler(async (req, res, next) => {
   // Get details of books, book instances for specific book
   const [book, bookInstances] = await Promise.all([
@@ -159,12 +158,41 @@ exports.book_create_post = [
 
 // Display book delete form on GET.
 exports.book_delete_get = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: Book delete GET");
+  const [book, allbookinstancesofbook] = await Promise.all([
+    Book.findById(req.params.id).exec(),
+    BookInstance.find({book: req.params.id}),
+  ]);
+
+  if(book === null){
+    res.redirect("/catalog/book");
+  }
+  res.render("book_delete", {
+    title: "Delete Book",
+    book: book,
+    bookinstances: allbookinstancesofbook,
+  });
 });
 
 // Handle book delete on POST.
 exports.book_delete_post = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: Book delete POST");
+  const [book, allbookinstancesofbook] = await Promise.all([
+    Book.findById(req.params.id).exec(),
+    BookInstance.find({book: req.params.id}),
+  ]);
+
+  if(allbookinstancesofbook.length > 0){
+    res.render("book_delete", {
+      title: "Delete Book",
+      book: book,
+      bookinstances: allbookinstancesofbook,
+    });
+    return;
+  }
+
+  else{
+    await Book.findByIdAndRemove(req.params.id);
+    res.redirect("/catalog/books");
+  }
 });
 
 // Display book update form on GET.
