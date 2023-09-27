@@ -1,12 +1,17 @@
 var createError = require('http-errors');
 var express = require('express');
 
+
+// Set up mongoose connection
 const mongoose = require("mongoose");
 mongoose.set("strictQuery", false);
-const mongoDB = "mongodb+srv://username:AOTARY061J4QEwUD@cluster0.xhe3oqr.mongodb.net/local_library?retryWrites=true&w=majority"
+
+const dev_db_url =
+  "mongodb+srv://username:AOTARY061J4QEwUD@cluster0.lz91hw2.mongodb.net/local_library?retryWrites=true&w=majority";
+const mongoDB = process.env.MONGODB_URI || dev_db_url;
 
 main().catch((err) => console.log(err));
-async function main(){
+async function main() {
   await mongoose.connect(mongoDB);
 }
 
