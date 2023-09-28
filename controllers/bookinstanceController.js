@@ -36,12 +36,14 @@ exports.bookinstance_detail = asyncHandler(async (req, res, next) => {
 
 // Display BookInstance create form on GET.
 exports.bookinstance_create_get = asyncHandler(async (req, res, next) => {
-  const allBooks = await Book.find({}, "title").exec();
+  if(req.user){
+    const allBooks = await Book.find({}, "title").exec();
 
-  res.render("bookinstance_form", {
-    title: "Create BookInstance",
-    book_list: allBooks,
-  });
+    res.render("bookinstance_form", {
+      title: "Create BookInstance",
+      book_list: allBooks,
+    });
+  }
 });
 
 
@@ -96,10 +98,12 @@ exports.bookinstance_create_post = [
 
 // Display BookInstance delete form on GET.
 exports.bookinstance_delete_get = asyncHandler(async (req, res, next) => {
-  res.render("bookinstance_delete", {
-    title: "Delete Book Instance",
-    id: req.params.id,
-  });
+  if(req.user){
+    res.render("bookinstance_delete", {
+      title: "Delete Book Instance",
+      id: req.params.id,
+    });
+  }
 });
 
 // Handle BookInstance delete on POST.

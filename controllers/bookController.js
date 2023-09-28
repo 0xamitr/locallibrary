@@ -34,7 +34,6 @@ exports.index = asyncHandler(async (req, res, next) => {
 
 
 // Display list of all books.
-// Display list of all books.
 exports.book_list = asyncHandler(async (req, res, next) => {
   const allBooks = await Book.find({}, "title author")
     .sort({ title: 1 })
@@ -71,16 +70,18 @@ exports.book_detail = asyncHandler(async (req, res, next) => {
 // Display book create form on GET.
 exports.book_create_get = asyncHandler(async (req, res, next) => {
   // Get all authors and genres, which we can use for adding to our book.
-  const [allAuthors, allGenres] = await Promise.all([
-    Author.find().exec(),
-    Genre.find().exec(),
-  ]);
+  if(req.user){
+    const [allAuthors, allGenres] = await Promise.all([
+      Author.find().exec(),
+      Genre.find().exec(),
+    ]);
 
-  res.render("book_form", {
-    title: "Create Book",
-    authors: allAuthors,
-    genres: allGenres,
-  });
+    res.render("book_form", {
+      title: "Create Book",
+      authors: allAuthors,
+      genres: allGenres,
+    });
+  }
 });
 
 
@@ -158,19 +159,21 @@ exports.book_create_post = [
 
 // Display book delete form on GET.
 exports.book_delete_get = asyncHandler(async (req, res, next) => {
-  const [book, allbookinstancesofbook] = await Promise.all([
-    Book.findById(req.params.id).exec(),
-    BookInstance.find({book: req.params.id}),
-  ]);
+  if(req.user){
+    const [book, allbookinstancesofbook] = await Promise.all([
+      Book.findById(req.params.id).exec(),
+      BookInstance.find({book: req.params.id}),
+    ]);
 
-  if(book === null){
-    res.redirect("/catalog/book");
+    if(book === null){
+      res.redirect("/catalog/book");
+    }
+    res.render("book_delete", {
+      title: "Delete Book",
+      book: book,
+      bookinstances: allbookinstancesofbook,
+    });
   }
-  res.render("book_delete", {
-    title: "Delete Book",
-    book: book,
-    bookinstances: allbookinstancesofbook,
-  });
 });
 
 // Handle book delete on POST.
@@ -197,35 +200,37 @@ exports.book_delete_post = asyncHandler(async (req, res, next) => {
 
 // Display book update form on GET.
 exports.book_update_get = asyncHandler(async (req, res, next) => {
-  // Get book, authors and genres for form.
-  const [book, allAuthors, allGenres] = await Promise.all([
-    Book.findById(req.params.id).populate("author").populate("genre").exec(),
-    Author.find().exec(),
-    Genre.find().exec(),
-  ]);
+  if(req.user){
+    // Get book, authors and genres for form.
+    const [book, allAuthors, allGenres] = await Promise.all([
+      Book.findById(req.params.id).populate("author").populate("genre").exec(),
+      Author.find().exec(),
+      Genre.find().exec(),
+    ]);
 
-  if (book === null) {
-    // No results.
-    const err = new Error("Book not found");
-    err.status = 404;
-    return next(err);
-  }
+    if (book === null) {
+      // No results.
+      const err = new Error("Book not found");
+      err.status = 404;
+      return next(err);
+    }
 
-  // Mark our selected genres as checked.
-  for (const genre of allGenres) {
-    for (const book_g of book.genre) {
-      if (genre._id.toString() === book_g._id.toString()) {
-        genre.checked = "true";
+    // Mark our selected genres as checked.
+    for (const genre of allGenres) {
+      for (const book_g of book.genre) {
+        if (genre._id.toString() === book_g._id.toString()) {
+          genre.checked = "true";
+        }
       }
     }
-  }
 
-  res.render("book_form", {
-    title: "Update Book",
-    authors: allAuthors,
-    genres: allGenres,
-    book: book,
-  });
+    res.render("book_form", {
+      title: "Update Book",
+      authors: allAuthors,
+      genres: allGenres,
+      book: book,
+    });
+  }
 });
 
 

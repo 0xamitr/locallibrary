@@ -36,7 +36,9 @@ exports.genre_detail = asyncHandler(async (req, res, next) => {
 
 // Display Genre create form on GET.
 exports.genre_create_get = (req, res, next) => {
-  res.render("genre_form", { title: "Create Genre" });
+  if(req.user){
+    res.render("genre_form", { title: "Create Genre" });
+  }
 };
 
 
@@ -86,19 +88,21 @@ exports.genre_create_post = [
 
 // Display Genre delete form on GET.
 exports.genre_delete_get = asyncHandler(async (req, res, next) => {
-  const [genre, allbooksofgenre] = await Promise.all([
-    Genre.findById(req.params.id).exec(),
-    Book.find({genre: req.params.id}),
-  ]);
+  if(req.user){
+    const [genre, allbooksofgenre] = await Promise.all([
+      Genre.findById(req.params.id).exec(),
+      Book.find({genre: req.params.id}),
+    ]);
 
-  if(Genre === null){
-    res.redirect("/catalog/genre");
+    if(Genre === null){
+      res.redirect("/catalog/genre");
+    }
+    res.render("genre_delete", {
+      title: "Delete Genre",
+      genre: genre,
+      booksofgenre: allbooksofgenre,
+    });
   }
-  res.render("genre_delete", {
-    title: "Delete Genre",
-    genre: genre,
-    booksofgenre: allbooksofgenre,
-  });
 });
 
 // Handle Genre delete on POST.

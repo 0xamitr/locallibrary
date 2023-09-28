@@ -40,7 +40,9 @@ exports.author_detail = asyncHandler(async (req, res, next) => {
 
 // Display Author create form on GET.
 exports.author_create_get = (req, res, next) => {
-  res.render("author_form", { title: "Create Author" });
+  if(req.user){
+    res.render("author_form", { title: "Create Author" });
+  }
 };
 
 
@@ -108,21 +110,23 @@ exports.author_create_post = [
 // Display Author delete form on GET.
 exports.author_delete_get = asyncHandler(async (req, res, next) => {
   // Get details of author and all their books (in parallel)
-  const [author, allBooksByAuthor] = await Promise.all([
-    Author.findById(req.params.id).exec(),
-    Book.find({ author: req.params.id }, "title summary").exec(),
-  ]);
+  if(req.user){
+    const [author, allBooksByAuthor] = await Promise.all([
+      Author.findById(req.params.id).exec(),
+      Book.find({ author: req.params.id }, "title summary").exec(),
+    ]);
 
-  if (author === null) {
-    // No results.
-    res.redirect("/catalog/authors");
+    if (author === null) {
+      // No results.
+      res.redirect("/catalog/authors");
+    }
+
+    res.render("author_delete", {
+      title: "Delete Author",
+      author: author,
+      author_books: allBooksByAuthor,
+    });
   }
-
-  res.render("author_delete", {
-    title: "Delete Author",
-    author: author,
-    author_books: allBooksByAuthor,
-  });
 });
 
 

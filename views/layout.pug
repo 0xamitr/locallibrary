@@ -26,14 +26,21 @@ html(lang='en')
                 a(href='/catalog/bookinstances') All book-instances
               li
                 hr
-              li
-                a(href='/catalog/author/create') Create new author
-              li
-                a(href='/catalog/genre/create') Create new genre
-              li
-                a(href='/catalog/book/create') Create new book
-              li
-                a(href='/catalog/bookinstance/create') Create new book instance (copy)
+              if(currentUser)
+                li
+                  a(href='/catalog/author/create') Create new author
+                li
+                  a(href='/catalog/genre/create') Create new genre
+                li
+                  a(href='/catalog/book/create') Create new book
+                li
+                  a(href='/catalog/bookinstance/create') Create new book instance (copy)
 
-        div(class='col-sm-10')
+        div(class='col-sm-9')
           block content
+
+        div(class='col-sm-1')
+          if(currentUser)
+            a.btn(href='/logout') Logout
+          else
+            a.btn(href='/login') Login
